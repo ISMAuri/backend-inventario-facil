@@ -13,7 +13,7 @@ const router = Router();
 // desactivar categorías sí requiere ser admin, porque afecta el
 // catálogo que ven TODOS los usuarios (clientes y proveedores).
 // -----------------------------------------------------------------------
-
+//Este es un cambio cualquier solo para disparar el flujo de trabajo de GitHub Actions. No tiene relevancia para el proyecto.
 router.get('/', categoriaController.listarCategorias);
 router.get('/:id', categoriaController.obtenerCategoria);
 
