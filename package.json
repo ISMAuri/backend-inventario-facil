@@ -5,8 +5,12 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
+<<<<<<< HEAD
     "start": "node src/server.js",
     "seed:categorias": "node src/seeders/categoria.seeder.js"
+=======
+    "start": "node src/server.js"
+>>>>>>> b996d5d195564e29ea4d0c15440f7588e903be79
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

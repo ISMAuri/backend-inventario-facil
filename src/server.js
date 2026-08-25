@@ -6,7 +6,10 @@ const sequelize = require('./config/database');
 // asociaciones (User.hasMany(RefreshToken), etc.) antes del sync/arranque.
 require('./models/user.model');
 require('./models/refreshToken.model');
+<<<<<<< HEAD
 require('./models/categoria.model');
+=======
+>>>>>>> b996d5d195564e29ea4d0c15440f7588e903be79
 
 const PORT = process.env.PORT || 4000;
 
