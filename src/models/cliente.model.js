@@ -63,7 +63,7 @@ Cliente.init(
   {
     sequelize,
     modelName: "Cliente",
-    tableName: "clientes",
+    tableName: "cliente",
     timestamps: false,
   },
 );
