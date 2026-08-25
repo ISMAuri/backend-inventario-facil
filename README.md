@@ -1,3 +1,5 @@
+# Backend del Proyecto de Programación Móvil: Inventario Fácil
+
 # FixIt Backend — Sesión 1: Setup + Módulo de Autenticación (JWT manual)
 
 ## 1. Estructura de carpetas (y por qué es así)
