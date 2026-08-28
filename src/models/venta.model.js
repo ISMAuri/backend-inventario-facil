@@ -30,6 +30,11 @@ Venta.init(
       },
     },
 
+    usuario_nombre_factura: {
+      type: DataTypes.STRING(150),
+      allowNull: false,
+    },
+
     id_autorizacion: {
       type: DataTypes.INTEGER,
       allowNull: false,
