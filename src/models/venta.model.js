@@ -25,8 +25,8 @@ Venta.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "usuario",
-        key: "id_usuario",
+        model: "users",
+        key: "id",
       },
     },
 
