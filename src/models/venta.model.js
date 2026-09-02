@@ -86,7 +86,7 @@ Venta.init(
 
     empresa_rtn_factura: {
       type: DataTypes.STRING(20),
-      allowNull: false,
+      allowNull: true,
     },
 
     empresa_direccion_factura: {
