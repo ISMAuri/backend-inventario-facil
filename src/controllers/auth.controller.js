@@ -1,4 +1,4 @@
-const authService = require('../services/auth.service');
+const authService = require("../services/auth.service");
 
 // -----------------------------------------------------------------------
 // CONTEXTO PARA EL ESTUDIANTE:
@@ -14,10 +14,10 @@ const authService = require('../services/auth.service');
 // cookies vía XSS y CSRF. El JS del navegador NO puede leer esta cookie.
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict",
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días, en ms
-  path: '/api/auth', // solo se envía en rutas de auth, no en toda la app
+  path: "/api/auth", // solo se envía en rutas de auth, no en toda la app
 };
 
 class AuthController {
@@ -31,7 +31,7 @@ class AuthController {
         role,
       });
 
-      res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
+      res.cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
       res.status(201).json({ accessToken, user });
     } catch (err) {
       next(err); // delegamos al middleware centralizado de errores
@@ -44,10 +44,10 @@ class AuthController {
       const { accessToken, refreshToken, user } = await authService.login({
         email,
         password,
-        userAgent: req.headers['user-agent'],
+        userAgent: req.headers["user-agent"],
       });
 
-      res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
+      res.cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
       res.status(200).json({ accessToken, user });
     } catch (err) {
       next(err);
@@ -58,14 +58,13 @@ class AuthController {
     try {
       const oldRefreshToken = req.cookies?.refreshToken;
       if (!oldRefreshToken) {
-        return res.status(401).json({ message: 'No hay sesión activa' });
+        return res.status(401).json({ message: "No hay sesión activa" });
       }
 
-      const { accessToken, refreshToken, user } = await authService.refresh(
-        oldRefreshToken
-      );
+      const { accessToken, refreshToken, user } =
+        await authService.refresh(oldRefreshToken);
 
-      res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
+      res.cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
       res.status(200).json({ accessToken, user });
     } catch (err) {
       next(err);
@@ -78,8 +77,17 @@ class AuthController {
       if (refreshToken) {
         await authService.logout(refreshToken);
       }
-      res.clearCookie('refreshToken', REFRESH_COOKIE_OPTIONS);
+      res.clearCookie("refreshToken", REFRESH_COOKIE_OPTIONS);
       res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  }
+  async obtenerUsuario(req, res, next) {
+    try {
+      const usuario = await authService.obtenerPorId(req.params.id);
+
+      res.status(200).json(usuario);
     } catch (err) {
       next(err);
     }

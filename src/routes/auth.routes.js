@@ -72,4 +72,10 @@ router.get('/me', authenticate, async (req, res, next) => {
   }
 });
 
+router.get(
+  '/:id',
+  authenticate,
+  authController.obtenerUsuario
+);
+
 module.exports = router;

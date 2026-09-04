@@ -1,4 +1,4 @@
-const User = require('../models/user.model');
+const User = require("../models/user.model");
 
 // -----------------------------------------------------------------------
 // CONTEXTO PARA EL ESTUDIANTE:
@@ -14,7 +14,11 @@ class UserRepository {
   }
 
   async findById(id) {
-    return User.findByPk(id);
+    return User.findByPk(id, {
+      attributes: {
+        exclude: ["passwordHash"],
+      },
+    });
   }
 
   async create({ fullName, email, passwordHash, role }) {
