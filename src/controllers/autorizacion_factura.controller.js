@@ -35,18 +35,18 @@ class AutorizacionFacturaController {
     }
   }
 
-  async listarActivasPorEmpresa(req, res, next) {
-    try {
-      const autorizaciones =
-        await autorizacionFacturaService.listarActivasPorEmpresa(
-          req.params.id_empresa,
-        );
+  async obtenerActivaPorEmpresa(req, res, next) {
+  try {
+    const autorizacion =
+      await autorizacionFacturaService.obtenerActivaPorEmpresa(
+        req.params.id_empresa,
+      );
 
-      res.status(200).json(autorizaciones);
-    } catch (err) {
-      next(err);
-    }
+    res.status(200).json(autorizacion);
+  } catch (err) {
+    next(err);
   }
+}
 
   async crearAutorizacion(req, res, next) {
     try {

@@ -1,3 +1,4 @@
+const sequelize = require("../config/database");
 const autorizacionRepository = require("../repositories/autorizacion_factura.repository");
 const empresaRepository = require("../repositories/empresa.repository");
 
@@ -21,10 +22,10 @@ class AutorizacionFacturaService {
     return autorizacion;
   }
 
-  async listarActivasPorEmpresa(id_empresa) {
+  async obtenerActivaPorEmpresa(id_empresa) {
     await this._validarEmpresa(id_empresa);
 
-    return autorizacionRepository.findActivasByEmpresa(id_empresa);
+    return autorizacionRepository.findActivaByEmpresa(id_empresa);
   }
 
   async crear(datos) {
@@ -32,9 +33,30 @@ class AutorizacionFacturaService {
 
     this._validarRangos(datos);
 
+    const transaction = await sequelize.transaction();
+
     try {
-      return await autorizacionRepository.create(datos);
+      // Desactiva cualquier autorización activa anterior.
+      await autorizacionRepository.desactivarActivas(
+        datos.id_empresa,
+        transaction,
+      );
+
+      // La nueva autorización siempre queda activa.
+      const nuevaAutorizacion = await autorizacionRepository.create(
+        {
+          ...datos,
+          estado: true,
+        },
+        transaction,
+      );
+
+      await transaction.commit();
+
+      return nuevaAutorizacion;
     } catch (err) {
+      await transaction.rollback();
+
       throw this._traducirErrorSequelize(err);
     }
   }
@@ -42,29 +64,37 @@ class AutorizacionFacturaService {
   async actualizar(id, cambios) {
     const autorizacion = await this.obtenerPorId(id);
 
-    if (cambios.id_empresa !== undefined) {
-      await this._validarEmpresa(cambios.id_empresa);
+    const { estado, ...cambiosPermitidos } = cambios;
+
+    if (cambiosPermitidos.id_empresa !== undefined) {
+      await this._validarEmpresa(cambiosPermitidos.id_empresa);
     }
 
     const datosFinales = {
-      rango_inicial: cambios.rango_inicial ?? autorizacion.rango_inicial,
+      rango_inicial:
+        cambiosPermitidos.rango_inicial ?? autorizacion.rango_inicial,
 
-      rango_final: cambios.rango_final ?? autorizacion.rango_final,
+      rango_final: cambiosPermitidos.rango_final ?? autorizacion.rango_final,
 
       siguiente_correlativo:
-        cambios.siguiente_correlativo ?? autorizacion.siguiente_correlativo,
+        cambiosPermitidos.siguiente_correlativo ??
+        autorizacion.siguiente_correlativo,
 
       fecha_autorizacion:
-        cambios.fecha_autorizacion ?? autorizacion.fecha_autorizacion,
+        cambiosPermitidos.fecha_autorizacion ?? autorizacion.fecha_autorizacion,
 
       fecha_limite_emision:
-        cambios.fecha_limite_emision ?? autorizacion.fecha_limite_emision,
+        cambiosPermitidos.fecha_limite_emision ??
+        autorizacion.fecha_limite_emision,
     };
 
     this._validarRangos(datosFinales);
 
     try {
-      return await autorizacionRepository.update(autorizacion, cambios);
+      return await autorizacionRepository.update(
+        autorizacion,
+        cambiosPermitidos,
+      );
     } catch (err) {
       throw this._traducirErrorSequelize(err);
     }

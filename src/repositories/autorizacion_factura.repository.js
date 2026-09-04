@@ -22,16 +22,30 @@ class AutorizacionFacturaRepository {
     return AutorizacionFactura.findByPk(id);
   }
 
-  async findActivasByEmpresa(id_empresa) {
-    return AutorizacionFactura.findAll({
+  async findActivaByEmpresa(id_empresa, transaction = null) {
+    return AutorizacionFactura.findOne({
       where: {
         id_empresa,
         estado: true,
       },
       order: [["fecha_autorizacion", "DESC"]],
+      transaction,
     });
   }
-
+  async desactivarActivas(id_empresa, transaction = null) {
+    return AutorizacionFactura.update(
+      {
+        estado: false,
+      },
+      {
+        where: {
+          id_empresa,
+          estado: true,
+        },
+        transaction,
+      },
+    );
+  }
   async create(datos, transaction = null) {
     return AutorizacionFactura.create(datos, {
       transaction,

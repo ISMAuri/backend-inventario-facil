@@ -16,9 +16,9 @@ router.get(
 );
 
 router.get(
-  "/empresa/:id_empresa/activas",
+  "/empresa/:id_empresa/activa",
   authenticate,
-  autorizacionFacturaController.listarActivasPorEmpresa,
+  autorizacionFacturaController.obtenerActivaPorEmpresa,
 );
 
 router.get(
@@ -101,11 +101,6 @@ router.put(
     body("fecha_autorizacion").optional().isISO8601(),
 
     body("fecha_limite_emision").optional().isISO8601(),
-
-    body("estado")
-      .optional()
-      .isBoolean()
-      .withMessage("estado debe ser true o false"),
   ],
   handleValidationErrors,
   autorizacionFacturaController.actualizarAutorizacion,

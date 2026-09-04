@@ -20,16 +20,16 @@ async function seed() {
 
     const [autorizacion, creada] = await AutorizacionFactura.findOrCreate({
       where: {
-        cai: "CAI-DEMO-NO-VALIDO",
+        cai: "3C18C3-8C69E3-1BE5E0-63BE03-0909BF-A0",
       },
       defaults: {
         id_empresa: empresa.id_empresa,
-        cai: "CAI-DEMO-NO-VALIDO",
+        cai: "3C18C3-8C69E3-1BE5E0-63BE03-0909BF-A0",
         establecimiento: "001",
         punto_emision: "001",
         tipo_documento: "01",
         rango_inicial: 1,
-        rango_final: 1000,
+        rango_final: 5000,
         siguiente_correlativo: 1,
         fecha_autorizacion: "2026-01-01",
         fecha_limite_emision: "2027-12-31",

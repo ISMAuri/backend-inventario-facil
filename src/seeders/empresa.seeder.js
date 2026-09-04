@@ -9,15 +9,16 @@ async function seed() {
 
     const [empresa, creada] = await Empresa.findOrCreate({
       where: {
-        nombre_empresa: "Distribuidora Demo",
+        nombre_empresa: "Inversiones Sammy",
       },
       defaults: {
-        nombre_empresa: "Distribuidora Demo",
-        razon_social: "Distribuidora Demo S. de R.L.",
-        rtn: null,
-        direccion: "Tegucigalpa, Honduras",
-        telefono: "9999-9999",
-        correo: "ventas@distribuidorademo.com",
+        nombre_empresa: "Inversiones Sammy",
+        razon_social: "Inversiones Sammy S. de R.L.",
+        rtn: "01079016892580",
+        direccion:
+          "Los Fuertes contiguo al Super Olguita, Roatan, Islas de la Bahia",
+        telefono: "97547973",
+        correo: "inversionesammy2019@hotmail.com",
         logo: null,
       },
     });
