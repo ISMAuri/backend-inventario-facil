@@ -1,4 +1,4 @@
-const { DataTypes, Model } = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 
 const sequelize = require("../config/database");
 
@@ -55,7 +55,7 @@ MovimientoInventario.init(
     fecha_movimiento: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: DataTypes.NOW,
+      defaultValue: Sequelize.NOW,
     },
 
     motivo: {

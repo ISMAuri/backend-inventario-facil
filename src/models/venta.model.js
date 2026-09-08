@@ -1,4 +1,4 @@
-const { DataTypes, Model } = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 
 const sequelize = require("../config/database");
 
@@ -114,16 +114,6 @@ Venta.init(
       allowNull: false,
     },
 
-    cliente_tipo_documento_factura: {
-      type: DataTypes.STRING(30),
-      allowNull: true,
-    },
-
-    cliente_numero_documento_factura: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-    },
-
     cliente_rtn_factura: {
       type: DataTypes.STRING(20),
       allowNull: true,
@@ -162,7 +152,7 @@ Venta.init(
     fecha_venta: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: DataTypes.NOW,
+      defaultValue: Sequelize.NOW,
     },
 
     moneda: {
