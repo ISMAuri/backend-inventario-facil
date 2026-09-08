@@ -7,6 +7,7 @@ const autorizacionRepository = require("../repositories/autorizacion_factura.rep
 const empresaRepository = require("../repositories/empresa.repository");
 const movimientoRepository = require("../repositories/movimiento_inventario.repository");
 const userRepository = require("../repositories/user.repository");
+const { generarFacturaPdf } = require("../utils/factura_pdf");
 
 const { convertirTotalALetras } = require("../utils/numero_a_letras");
 
@@ -37,6 +38,33 @@ class VentaService {
     }
 
     return venta;
+  }
+
+  async generarPdf(id) {
+    const venta = await this.obtenerPorId(id);
+
+    const detalles = await detalleVentaRepository.findByVenta(venta.id_venta);
+
+    if (detalles.length === 0) {
+      const error = new Error("La factura no contiene detalles");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Convertimos los modelos Sequelize
+    // a objetos normales antes de pasarlos al PDF.
+    const ventaData = venta.get ? venta.get({ plain: true }) : venta;
+
+    const detallesData = detalles.map((detalle) =>
+      detalle.get ? detalle.get({ plain: true }) : detalle,
+    );
+
+    const documento = generarFacturaPdf(ventaData, detallesData);
+
+    return {
+      documento,
+      numeroFactura: venta.numero_factura,
+    };
   }
 
   async emitir({

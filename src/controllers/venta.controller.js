@@ -86,6 +86,28 @@ class VentaController {
       next(error);
     }
   }
+  async descargarPdf(req, res, next) {
+    try {
+      const { documento, numeroFactura } = await ventaService.generarPdf(
+        req.params.id,
+      );
+
+      const nombreArchivo = `factura-${numeroFactura}.pdf`;
+
+      res.setHeader("Content-Type", "application/pdf");
+
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${nombreArchivo}"`,
+      );
+
+      documento.pipe(res);
+
+      documento.end();
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new VentaController();

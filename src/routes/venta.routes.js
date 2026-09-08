@@ -96,4 +96,10 @@ router.put(
   ventaController.anularVenta,
 );
 
+router.get(
+  "/:id/pdf",
+  authenticate,
+  ventaController.descargarPdf,
+);
+
 module.exports = router;

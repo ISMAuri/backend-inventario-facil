@@ -664,6 +664,10 @@ function dibujarTotales(doc, venta) {
     anchoEtiqueta: 160,
     tamanio: 10,
   });
+  
+  linea(doc, doc.y + 2);
+
+  doc.y += 10;
 }
 
 /*
@@ -679,25 +683,22 @@ function dibujarPie(doc) {
     .font("Helvetica")
     .fontSize(9)
     .fillColor("#555555")
-    .text("Original: Cliente - Copia: Emisor", MARGEN, doc.y, {
+    .text("Original: Cliente", MARGEN, doc.y, {
       width: ANCHO_UTIL,
       align: "center",
     });
-
-  doc.moveDown(0.5);
+  doc.moveDown(1);
 
   doc
-    .fontSize(8.5)
-    .text(
-      "Documento generado por el sistema Inventario Fácil. " +
-        "Este documento es un comprobante de la transacción realizada.",
-      MARGEN + 25,
-      doc.y,
-      {
-        width: ANCHO_UTIL - 50,
-        align: "center",
-      },
-    );
+    .font("Helvetica")
+    .fontSize(9)
+    .fillColor("#555555")
+    .text("Copia: Emisor", MARGEN, doc.y, {
+      width: ANCHO_UTIL,
+      align: "center",
+    });
+  doc.moveDown(0.5);
+
 
   doc.fillColor("#000000");
 }
