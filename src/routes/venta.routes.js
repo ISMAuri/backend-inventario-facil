@@ -71,11 +71,6 @@ router.post(
       .trim()
       .isLength({ max: 50 }),
 
-    body("total_letras")
-      .trim()
-      .notEmpty()
-      .withMessage("El total en letras es obligatorio")
-      .isLength({ max: 500 }),
   ],
   handleValidationErrors,
   ventaController.emitirVenta,
@@ -93,6 +88,12 @@ router.patch(
   ],
   handleValidationErrors,
   ventaController.actualizarRutaPdf,
+);
+
+router.put(
+  "/:id/anular",
+  authenticate,
+  ventaController.anularVenta,
 );
 
 module.exports = router;

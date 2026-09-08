@@ -1,16 +1,15 @@
-const DetalleVenta = require(
-  "../models/detalle_venta.model"
-);
+const DetalleVenta = require("../models/detalle_venta.model");
 
 class DetalleVentaRepository {
   async findById(id) {
     return DetalleVenta.findByPk(id);
   }
 
-  async findByVenta(id_venta) {
+  async findByVenta(id_venta, transaction = null) {
     return DetalleVenta.findAll({
       where: { id_venta },
       order: [["id_detalle_venta", "ASC"]],
+      transaction,
     });
   }
 

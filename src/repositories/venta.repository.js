@@ -74,6 +74,16 @@ class VentaRepository {
       transaction,
     });
   }
+  async anular(venta, transaction = null) {
+    return venta.update(
+      {
+        estado_factura: false,
+      },
+      {
+        transaction,
+      },
+    );
+  }
 }
 
 module.exports = new VentaRepository();

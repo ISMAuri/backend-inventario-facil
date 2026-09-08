@@ -8,6 +8,9 @@ const empresaRepository = require("../repositories/empresa.repository");
 const movimientoRepository = require("../repositories/movimiento_inventario.repository");
 const userRepository = require("../repositories/user.repository");
 
+const { convertirTotalALetras } = require("../utils/numero_a_letras");
+
+
 class VentaService {
   async listar(filtros = {}) {
     return ventaRepository.findAll(filtros);
@@ -46,7 +49,6 @@ class VentaService {
     orden_compra_exenta,
     constancia_registro_exonerados,
     registro_sag,
-    total_letras,
   }) {
     if (!Array.isArray(detalles) || detalles.length === 0) {
       const error = new Error("La venta debe contener al menos un producto");
@@ -235,6 +237,7 @@ class VentaService {
       }
 
       const total = subtotal + totalIsv15 + totalIsv18;
+      const totalLetras = convertirTotalALetras(total);
 
       const venta = await ventaRepository.create(
         {
@@ -310,7 +313,7 @@ class VentaService {
 
           total,
 
-          total_letras,
+          total_letras: totalLetras,
         },
         transaction,
       );
@@ -393,6 +396,87 @@ class VentaService {
 
     return ventaRepository.update(venta, {
       ruta_pdf_factura,
+    });
+  }
+
+  async anular(id, id_usuario) {
+    const venta = await this.obtenerPorId(id);
+
+    if (!venta.estado_factura) {
+      const error = new Error("La factura ya está anulada");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const usuario = await userRepository.findById(id_usuario);
+
+    if (!usuario) {
+      const error = new Error("Usuario no encontrado");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const fechaEmision = new Date(venta.fecha_venta);
+    const hoy = new Date();
+
+    const diferenciaMs = hoy.getTime() - fechaEmision.getTime();
+    const diasTranscurridos = diferenciaMs / (1000 * 60 * 60 * 24);
+
+    if (diasTranscurridos >= 30) {
+      const error = new Error(
+        "La factura no puede anularse porque han pasado 30 días desde su emisión",
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    return sequelize.transaction(async (transaction) => {
+      const detalles = await detalleVentaRepository.findByVenta(
+        venta.id_venta,
+        transaction,
+      );
+
+      if (detalles.length === 0) {
+        const error = new Error("La factura no contiene detalles de venta");
+        error.statusCode = 400;
+        throw error;
+      }
+
+      for (const detalle of detalles) {
+        const producto = await productoRepository.findById(detalle.id_producto);
+
+        if (!producto) {
+          const error = new Error(
+            `Producto ${detalle.id_producto} no encontrado`,
+          );
+          error.statusCode = 404;
+          throw error;
+        }
+
+        await productoRepository.update(
+          producto,
+          {
+            stock_actual:
+              Number(producto.stock_actual) + Number(detalle.cantidad),
+          },
+          transaction,
+        );
+
+        await movimientoRepository.create(
+          {
+            id_producto: producto.id_producto,
+            id_usuario,
+            tipo_movimiento: "entrada",
+            cantidad: Number(detalle.cantidad),
+            motivo: `Anulación factura ${venta.numero_factura}`,
+          },
+          transaction,
+        );
+      }
+
+      const ventaAnulada = await ventaRepository.anular(venta, transaction);
+
+      return ventaAnulada;
     });
   }
 

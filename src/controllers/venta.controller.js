@@ -71,6 +71,21 @@ class VentaController {
       next(err);
     }
   }
+
+  async anularVenta(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const venta = await ventaService.anular(id, req.user.id);
+
+      res.status(200).json({
+        message: "Factura anulada correctamente",
+        venta,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new VentaController();

@@ -174,7 +174,7 @@ Venta.init(
     tasa_cambio: {
       type: DataTypes.DECIMAL(12, 6),
       allowNull: false,
-      defaultValue: 1.000000,
+      defaultValue: 1.0,
     },
 
     subtotal: {
@@ -185,49 +185,49 @@ Venta.init(
     total_descuentos: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
-      defaultValue: 0.00,
+      defaultValue: 0.0,
     },
 
     total_exento: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
-      defaultValue: 0.00,
+      defaultValue: 0.0,
     },
 
     total_exonerado: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
-      defaultValue: 0.00,
+      defaultValue: 0.0,
     },
 
     total_tasa_cero: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
-      defaultValue: 0.00,
+      defaultValue: 0.0,
     },
 
     total_gravado_15: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
-      defaultValue: 0.00,
+      defaultValue: 0.0,
     },
 
     total_gravado_18: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
-      defaultValue: 0.00,
+      defaultValue: 0.0,
     },
 
     total_isv_15: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
-      defaultValue: 0.00,
+      defaultValue: 0.0,
     },
 
     total_isv_18: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
-      defaultValue: 0.00,
+      defaultValue: 0.0,
     },
 
     total: {
@@ -240,9 +240,10 @@ Venta.init(
       allowNull: false,
     },
 
-    estado_pago: {
-      type: DataTypes.STRING(30),
-      allowNull: true,
+    estado_factura: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     },
 
     metodo_pago: {
@@ -260,7 +261,7 @@ Venta.init(
     modelName: "Venta",
     tableName: "venta",
     timestamps: false,
-  }
+  },
 );
 
 module.exports = Venta;

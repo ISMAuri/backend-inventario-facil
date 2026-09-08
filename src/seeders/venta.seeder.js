@@ -137,7 +137,7 @@ async function seed() {
 
       // De momento lo ponemos manualmente porque tu service
       // actualmente espera recibir este valor.
-      total_letras: "TOTAL DE VENTA DE PRUEBA",
+      // total_letras: "TOTAL DE VENTA DE PRUEBA",
     });
 
     console.log(`✅ Venta demo creada: ${venta.numero_factura}`);
