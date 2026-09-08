@@ -10,7 +10,6 @@ const userRepository = require("../repositories/user.repository");
 
 const { convertirTotalALetras } = require("../utils/numero_a_letras");
 
-
 class VentaService {
   async listar(filtros = {}) {
     return ventaRepository.findAll(filtros);
@@ -265,6 +264,7 @@ class VentaService {
             autorizacion.tipo_documento,
             autorizacion.rango_final,
           ),
+          fecha_autorizacion_factura: autorizacion.fecha_autorizacion,
 
           fecha_limite_emision_factura: autorizacion.fecha_limite_emision,
 

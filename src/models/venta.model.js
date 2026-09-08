@@ -69,6 +69,11 @@ Venta.init(
       allowNull: false,
     },
 
+    fecha_autorizacion_factura: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+
     fecha_limite_emision_factura: {
       type: DataTypes.DATEONLY,
       allowNull: false,
