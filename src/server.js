@@ -33,9 +33,15 @@ async function startServer() {
       console.log("🔄 Modelos sincronizados con la base de datos.");
     }
 
-    app.listen(PORT, () => {
-      console.log(`🚀 Servidor FixIt corriendo en http://localhost:${PORT}`);
+    // Para desplegado en Railway
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
     });
+
+    // para Local
+    // app.listen(PORT, () => {
+    //   console.log(`🚀 Servidor FixIt corriendo en http://localhost:${PORT}`);
+    // });
   } catch (error) {
     console.error("❌ No se pudo iniciar el servidor:", error);
     process.exit(1);

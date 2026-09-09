@@ -9,7 +9,7 @@ const venta = {
 
   numero_factura: "001-001-01-00000011",
   correlativo: 11,
-
+  
   cai_factura: "123456-123456-123456-123456-123456-AA",
 
   rango_inicial_factura: "001-001-01-00000001",
