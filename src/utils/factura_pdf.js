@@ -78,14 +78,20 @@ function calcularAltoFactura(venta, detalles = []) {
   // Cada producto necesita aproximadamente
   // este espacio.
   for (const detalle of detalles) {
+    const codigo = textoSeguro(detalle.producto_codigo_factura, "N/A");
+
     const nombre = textoSeguro(detalle.producto_nombre_factura, "Producto");
 
-    const lineasNombre = Math.max(1, Math.ceil(nombre.length / 45));
+    const lineasCodigo = Math.max(1, Math.ceil(codigo.length / 12));
+
+    const lineasNombre = Math.max(1, Math.ceil(nombre.length / 32));
+
+    const lineasFila = Math.max(lineasCodigo, lineasNombre);
 
     alto += 20;
 
-    if (lineasNombre > 1) {
-      alto += (lineasNombre - 1) * 11;
+    if (lineasFila > 1) {
+      alto += (lineasFila - 1) * 11;
     }
   }
 
@@ -258,27 +264,27 @@ function dibujarEstado(doc, venta) {
 */
 
 function dibujarEncabezado(doc, venta) {
-  tituloCentrado(doc, "FACTURA", 20, true);
+  // tituloCentrado(doc, "FACTURA", 20, true);
 
   doc.moveDown(0.35);
 
   tituloCentrado(
     doc,
-    textoSeguro(venta.empresa_nombre_factura, "EMPRESA"),
+    textoSeguro(venta.empresa_razon_social_factura, "EMPRESA"),
     14,
     true,
   );
 
-  if (venta.empresa_razon_social_factura) {
-    doc.moveDown(0.1);
+  // if (venta.empresa_razon_social_factura) {
+  //   doc.moveDown(0.1);
 
-    tituloCentrado(
-      doc,
-      textoSeguro(venta.empresa_razon_social_factura),
-      10,
-      false,
-    );
-  }
+  //   tituloCentrado(
+  //     doc,
+  //     textoSeguro(venta.empresa_razon_social_factura),
+  //     10,
+  //     false,
+  //   );
+  // }
 
   doc.moveDown(0.2);
 
@@ -294,7 +300,7 @@ function dibujarEncabezado(doc, venta) {
   if (venta.empresa_telefono_factura) {
     tituloCentrado(
       doc,
-      `Tel: ${textoSeguro(venta.empresa_telefono_factura)}`,
+      `Tel: +504 ${textoSeguro(venta.empresa_telefono_factura)}`,
       9.5,
       false,
     );
@@ -315,10 +321,15 @@ function dibujarEncabezado(doc, venta) {
     doc
       .font("Helvetica")
       .fontSize(9.5)
-      .text(textoSeguro(venta.empresa_direccion_factura), MARGEN + 25, doc.y, {
-        width: ANCHO_UTIL - 50,
-        align: "center",
-      });
+      .text(
+        `Dirección: ${textoSeguro(venta.empresa_direccion_factura)}`,
+        MARGEN + 25,
+        doc.y,
+        {
+          width: ANCHO_UTIL - 50,
+          align: "center",
+        },
+      );
   }
 
   doc.moveDown(0.6);
@@ -345,6 +356,7 @@ function dibujarEncabezado(doc, venta) {
     9.5,
     false,
   );
+
   tituloCentrado(
     doc,
     `Fecha de autorización: ${fecha(venta.fecha_autorizacion_factura)}`,
@@ -369,14 +381,14 @@ function dibujarEncabezado(doc, venta) {
 
   tituloCentrado(
     doc,
-    `No.: ${textoSeguro(venta.numero_factura, "N/A")}`,
+    `Factura No.: ${textoSeguro(venta.numero_factura, "N/A")}`,
     14,
     false,
   );
 
-  tituloCentrado(doc, fecha(venta.fecha_venta, true), 9.5, false);
+  tituloCentrado(doc, `Fecha: ${fecha(venta.fecha_venta, true)}`, 9.5, false);
 
-  dibujarEstado(doc, venta);
+  // dibujarEstado(doc, venta);
 
   doc.moveDown(0.7);
 }
@@ -424,7 +436,7 @@ function dibujarCliente(doc, venta) {
   if (venta.cliente_telefono_factura) {
     etiquetaValor(
       doc,
-      "Teléfono:",
+      "Teléfono: +504 ",
       textoSeguro(venta.cliente_telefono_factura),
       {
         anchoEtiqueta: 60,
@@ -463,21 +475,25 @@ function dibujarCliente(doc, venta) {
 function dibujarDatosExoneracion(doc, venta) {
   etiquetaValor(
     doc,
-    "Orden de compra exenta:",
+    "No. de Orden de Compra Exenta:",
     textoSeguro(venta.orden_compra_exenta, ""),
   );
 
   etiquetaValor(
     doc,
-    "Constancia registro exonerados:",
+    "No. de Constancia Registro Exonerados:",
     textoSeguro(venta.constancia_registro_exonerados, ""),
   );
 
-  etiquetaValor(doc, "Registro SAG:", textoSeguro(venta.registro_sag, ""));
+  etiquetaValor(
+    doc,
+    "No. Identificativo de Registro de la SAG:",
+    textoSeguro(venta.registro_sag, ""),
+  );
 
-  linea(doc, doc.y + 2);
+  linea(doc, doc.y + 11);
 
-  doc.y += 10;
+  doc.y += 18;
 }
 
 /*
@@ -487,7 +503,9 @@ function dibujarDatosExoneracion(doc, venta) {
 */
 
 function encabezadoTabla(doc, y) {
-  const xProducto = MARGEN;
+  const xCodigo = MARGEN;
+
+  const xProducto = 120;
 
   const xCantidad = 345;
 
@@ -498,8 +516,11 @@ function encabezadoTabla(doc, y) {
   doc
     .font("Helvetica-Bold")
     .fontSize(9.5)
+    .text("Código", xCodigo, y, {
+      width: 70,
+    })
     .text("Producto", xProducto, y, {
-      width: 285,
+      width: 215,
     })
     .text("Cant.", xCantidad, y, {
       width: 50,
@@ -533,6 +554,8 @@ function dibujarDetalle(doc, detalles) {
   encabezadoTabla(doc, doc.y);
 
   for (const detalle of detalles) {
+    const codigo = textoSeguro(detalle.producto_codigo_factura, "N/A");
+
     const nombre = textoSeguro(detalle.producto_nombre_factura, "Producto");
 
     const cantidad = numero(detalle.cantidad);
@@ -541,19 +564,26 @@ function dibujarDetalle(doc, detalles) {
 
     const importe = numero(detalle.subtotal);
 
-    const altoNombre = doc.heightOfString(nombre, {
-      width: 285,
+    const altoCodigo = doc.heightOfString(codigo, {
+      width: 70,
     });
 
-    const altoFila = Math.max(18, altoNombre + 4);
+    const altoNombre = doc.heightOfString(nombre, {
+      width: 215,
+    });
+
+    const altoFila = Math.max(18, altoCodigo + 4, altoNombre + 4);
 
     const y = doc.y;
 
     doc
       .font("Helvetica")
       .fontSize(9.2)
-      .text(nombre, MARGEN, y, {
-        width: 285,
+      .text(codigo, MARGEN, y, {
+        width: 70,
+      })
+      .text(nombre, 120, y, {
+        width: 215,
       })
       .text(String(cantidad), 345, y, {
         width: 50,
@@ -614,7 +644,11 @@ function dibujarTotales(doc, venta) {
 
   filaTotal(doc, "IMPORTE EXENTO", venta.total_exento);
 
-  filaTotal(doc, "IMPORTE TASA 0%", venta.total_tasa_cero);
+  // filaTotal(
+  //   doc,
+  //   "IMPORTE TASA 0%",
+  //   venta.total_tasa_cero,
+  // );
 
   filaTotal(doc, "IMPORTE GRAVADO 15%", venta.total_gravado_15);
 
@@ -660,11 +694,11 @@ function dibujarTotales(doc, venta) {
   |--------------------------------------------------------------------------
   */
 
-  etiquetaValor(doc, "MÉTODO DE PAGO:", textoSeguro(venta.metodo_pago, ""), {
+  etiquetaValor(doc, "Método de Pago:", textoSeguro(venta.metodo_pago, ""), {
     anchoEtiqueta: 160,
     tamanio: 10,
   });
-  
+
   linea(doc, doc.y + 2);
 
   doc.y += 10;
@@ -687,6 +721,7 @@ function dibujarPie(doc) {
       width: ANCHO_UTIL,
       align: "center",
     });
+
   doc.moveDown(1);
 
   doc
@@ -697,8 +732,8 @@ function dibujarPie(doc) {
       width: ANCHO_UTIL,
       align: "center",
     });
-  doc.moveDown(0.5);
 
+  doc.moveDown(0.5);
 
   doc.fillColor("#000000");
 }
