@@ -264,7 +264,7 @@ class VentaService {
       }
 
       const total = subtotal + totalIsv15 + totalIsv18;
-      const totalLetras = convertirTotalALetras(total);
+      const totalLetras = await convertirTotalALetras(total);
 
       const venta = await ventaRepository.create(
         {

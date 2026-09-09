@@ -1,6 +1,8 @@
-const { toCardinal } = require("n2words/es-ES");
+const n2wordsPromise = import("n2words/es-ES");
 
-function convertirTotalALetras(total) {
+async function convertirTotalALetras(total) {
+  const { toCardinal } = await n2wordsPromise;
+  
   // Validar que el total sea un número válido
   const valor = Number(total);
 
