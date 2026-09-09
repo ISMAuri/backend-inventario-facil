@@ -20,7 +20,13 @@ async function seed() {
       process.exit(0);
     }
 
-    const passwordHash = await bcrypt.hash("Admin1234!", 10);
+    const password = process.env.SEED_ADMIN_PASSWORD;
+
+    if (!password) {
+      throw new Error("SEED_ADMIN_PASSWORD no está configurada");
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
 
     const usuario = await User.create({
       fullName: "Administrador",

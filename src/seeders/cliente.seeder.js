@@ -20,10 +20,17 @@ const CLIENTES = [
   },
   {
     nombre_cliente: "Comercial San José",
-    rtn: null,
+    rtn: "01079016892580",
     direccion: "Tegucigalpa",
     telefono: "9876-1003",
     correo: "compras@comercialsanjose.com",
+  },
+  {
+    nombre_cliente: "Consumidor Final",
+    rtn: null,
+    direccion: null,
+    telefono: null,
+    correo: null,
   },
 ];
 

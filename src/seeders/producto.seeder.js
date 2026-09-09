@@ -13,7 +13,7 @@ const PRODUCTOS = [
     codigo_producto: "LIM-001",
     precio_compra: 70.0,
     precio_venta: 95.0,
-    unidad_medida: "unidad",
+    unidad_medida: "Unidad",
     tasa_impuesto: 15.0,
   },
   {
@@ -23,7 +23,7 @@ const PRODUCTOS = [
     codigo_producto: "PAP-001",
     precio_compra: 50.0,
     precio_venta: 70.0,
-    unidad_medida: "paquete",
+    unidad_medida: "Paquete",
     tasa_impuesto: 15.0,
   },
   {

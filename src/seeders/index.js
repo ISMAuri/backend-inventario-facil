@@ -36,12 +36,11 @@ function ejecutarSeeders() {
       });
     } catch (error) {
       console.error(`\n❌ Falló ${seeder}. Se detuvo el proceso de seed.`);
-
-      process.exit(1);
+      throw error;
     }
   }
 
   console.log("\n✅ Todos los seeders fueron ejecutados correctamente.");
 }
 
-ejecutarSeeders();
+module.exports = ejecutarSeeders;
