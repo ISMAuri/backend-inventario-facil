@@ -388,7 +388,7 @@ function dibujarEncabezado(doc, venta) {
 
   tituloCentrado(doc, `Fecha: ${fecha(venta.fecha_venta, true)}`, 9.5, false);
 
-  // dibujarEstado(doc, venta);
+  dibujarEstado(doc, venta);
 
   doc.moveDown(0.7);
 }
