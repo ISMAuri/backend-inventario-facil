@@ -61,7 +61,7 @@ const venta = {
 
   total_letras: "DOSCIENTOS TREINTA LEMPIRAS CON 00/100",
 
-  estado_factura: false,
+  estado_factura: true,
 
   metodo_pago: "Efectivo",
 };

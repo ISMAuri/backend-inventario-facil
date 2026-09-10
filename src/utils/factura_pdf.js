@@ -199,15 +199,15 @@ function dibujarEstado(doc, venta) {
     venta.estado_factura === 0 ||
     venta.estado_factura === "0";
 
-  doc.moveDown(0.25);
+  // doc.moveDown(0.25);
 
-  doc
-    .font("Helvetica-Bold")
-    .fontSize(13)
-    .text(anulada ? "ANULADA" : "EMITIDA", MARGEN, doc.y, {
-      width: ANCHO_UTIL,
-      align: "center",
-    });
+  // doc
+  //   .font("Helvetica-Bold")
+  //   .fontSize(13)
+  //   .text(anulada ? "ANULADA" : "EMITIDA", MARGEN, doc.y, {
+  //     width: ANCHO_UTIL,
+  //     align: "center",
+  //   });
 
   if (anulada) {
     /*
