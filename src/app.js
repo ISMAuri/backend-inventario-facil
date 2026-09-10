@@ -1,8 +1,8 @@
-const express = require('express');
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
-const routes = require('./routes');
-const errorHandler = require('./middlewares/errorHandler');
+const express = require("express");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const routes = require("./routes");
+const errorHandler = require("./middlewares/errorHandler");
 
 // -----------------------------------------------------------------------
 // CONTEXTO PARA EL ESTUDIANTE:
@@ -18,23 +18,35 @@ const app = express();
 // consuman la API. En desarrollo, el origin viene del .env.
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
     credentials: true, // necesario para que las cookies httpOnly viajen
-  })
+  }),
 );
 
 app.use(express.json());
 app.use(cookieParser());
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-app.use('/api', routes);
+app.use("/api", routes);
+
+/*
+--AdminJS--
+Reservamos /admin antes del middleware 404.
+El router real de AdminJS se agrega desde server.js.
+*/
+const adminMountRouter = express.Router();
+
+app.use("/admin", adminMountRouter);
+
+// Lo exponemos para poder agregarle AdminJS desde server.js.
+app.adminMountRouter = adminMountRouter;
 
 // 404 para cualquier ruta no definida
 app.use((req, res) => {
-  res.status(404).json({ message: 'Ruta no encontrada' });
+  res.status(404).json({ message: "Ruta no encontrada" });
 });
 
 // SIEMPRE al final: captura errores de todos los controllers.

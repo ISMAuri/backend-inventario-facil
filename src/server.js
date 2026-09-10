@@ -32,13 +32,25 @@ async function startServer() {
       await sequelize.sync({ alter: true });
       console.log("🔄 Modelos sincronizados con la base de datos.");
     }
-    
+
     if (process.env.RUN_SEEDERS === "true") {
       const ejecutarSeeders = require("./seeders");
       await ejecutarSeeders();
 
       console.log("🌱 Seeders ejecutados correctamente.");
     }
+
+    // AdminJS
+    const { crearAdminRouter } = await import("./admin/admin.mjs");
+
+    const { adminRouter } = await crearAdminRouter();
+
+    app.adminMountRouter.use(adminRouter);
+
+    console.log(
+      `🛠️ Panel administrativo disponible en http://localhost:${PORT}/admin`,
+    );
+    //
 
     // Para desplegado en Railway
     app.listen(PORT, "0.0.0.0", () => {
