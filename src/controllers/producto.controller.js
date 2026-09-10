@@ -37,7 +37,7 @@ class ProductoController {
 
   async crearProducto(req, res, next) {
     try {
-      const producto = await productoService.crear(req.body);
+      const producto = await productoService.crear(req.body, req.user.id);
 
       res.status(201).json(producto);
     } catch (err) {
@@ -50,6 +50,7 @@ class ProductoController {
       const producto = await productoService.actualizar(
         req.params.id,
         req.body,
+        req.user.id,
       );
 
       res.status(200).json(producto);

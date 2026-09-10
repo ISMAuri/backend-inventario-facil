@@ -18,6 +18,9 @@ import AutorizacionFactura from "../models/autorizacion_factura.model.js";
 import Venta from "../models/venta.model.js";
 import DetalleVenta from "../models/detalle_venta.model.js";
 import MovimientoInventario from "../models/movimiento_inventario.model.js";
+import { Op } from "sequelize";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // Adaptador Sequelize
 AdminJS.registerAdapter({
@@ -25,7 +28,15 @@ AdminJS.registerAdapter({
   Database: AdminJSSequelize.Database,
 });
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const componentLoader = new ComponentLoader();
+
+const Dashboard = componentLoader.add(
+  "DashboardInventario",
+  path.resolve(__dirname, "components", "dashboard.jsx"),
+);
 
 // Grupos del menú
 const navegacionInventario = {
@@ -146,6 +157,61 @@ const autenticarAdministrador = async ({ email, password }) => {
   }
 };
 
+const dashboardHandler = async () => {
+  const [
+    totalProductos,
+    totalClientes,
+    totalVentas,
+    stockBajo,
+    agotados,
+    ventasAnuladas,
+    totalFacturado,
+  ] = await Promise.all([
+    Producto.count(),
+
+    Cliente.count(),
+
+    Venta.count(),
+
+    Producto.count({
+      where: {
+        stock_actual: {
+          [Op.gt]: 0,
+          [Op.lte]: 10,
+        },
+      },
+    }),
+
+    Producto.count({
+      where: {
+        stock_actual: 0,
+      },
+    }),
+
+    Venta.count({
+      where: {
+        estado_factura: false,
+      },
+    }),
+
+    Venta.sum("total", {
+      where: {
+        estado_factura: true,
+      },
+    }),
+  ]);
+
+  return {
+    totalProductos,
+    totalClientes,
+    totalVentas,
+    stockBajo,
+    agotados,
+    ventasAnuladas,
+    totalFacturado: totalFacturado ?? 0,
+  };
+};
+
 export async function crearAdminRouter() {
   const sessionSecret = process.env.ADMIN_SESSION_SECRET;
 
@@ -157,6 +223,10 @@ export async function crearAdminRouter() {
     rootPath: "/admin",
 
     componentLoader,
+    dashboard: {
+      component: Dashboard,
+      handler: dashboardHandler,
+    },
 
     resources: [
       // Categorías
@@ -343,6 +413,10 @@ export async function crearAdminRouter() {
       withMadeWithLove: false,
     },
   });
+  // Recompila los componentes personalizados cuando cambian
+  if (process.env.NODE_ENV === "development") {
+    admin.watch();
+  }
 
   // Autenticación
   const authProvider = new DefaultAuthProvider({

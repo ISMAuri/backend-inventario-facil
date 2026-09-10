@@ -47,7 +47,7 @@ async function seed() {
         where: {
           id_producto: producto.id_producto,
           tipo_movimiento: "entrada",
-          motivo: "Carga inicial de inventario",
+          motivo: "Carga inicial de inventario al registrar el producto",
         },
       });
 
@@ -63,7 +63,7 @@ async function seed() {
         id_usuario: usuario.id,
         tipo_movimiento: "entrada",
         cantidad: item.cantidad,
-        motivo: "Carga inicial de inventario",
+        motivo: "Carga inicial de inventario al registrar el producto",
       });
 
       console.log(
