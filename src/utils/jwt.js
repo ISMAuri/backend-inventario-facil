@@ -13,7 +13,7 @@ require('dotenv').config();
 const ACCESS_TOKEN_SECRET = process.env.JWT_ACCESS_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_SECRET;
 
-const ACCESS_TOKEN_EXPIRES_IN = '15m';
+const ACCESS_TOKEN_EXPIRES_IN = '30m';
 const REFRESH_TOKEN_EXPIRES_IN_DAYS = 7;
 
 function generateAccessToken(user) {
