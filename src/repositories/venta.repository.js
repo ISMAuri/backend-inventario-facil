@@ -84,6 +84,22 @@ class VentaRepository {
       },
     );
   }
+  async findUltimoCorrelativoPorSerie(
+    establecimiento,
+    puntoEmision,
+    tipoDocumento,
+  ) {
+    const prefijo = `${establecimiento}-${puntoEmision}-${tipoDocumento}-%`;
+
+    return Venta.findOne({
+      where: {
+        numero_factura: {
+          [Op.like]: prefijo,
+        },
+      },
+      order: [["correlativo", "DESC"]],
+    });
+  }
 }
 
 module.exports = new VentaRepository();

@@ -47,6 +47,7 @@ Venta.init(
     numero_factura: {
       type: DataTypes.STRING(19),
       allowNull: false,
+      unique: true,
     },
 
     correlativo: {
