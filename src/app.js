@@ -14,6 +14,10 @@ const errorHandler = require("./middlewares/errorHandler");
 
 const app = express();
 
+const path = require("path");
+
+app.use(express.static(path.join(__dirname, "../public")));
+
 // CORS: solo permitimos que nuestro frontend (Nuxt) y la app Flutter
 // consuman la API. En desarrollo, el origin viene del .env.
 app.use(

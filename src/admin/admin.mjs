@@ -18,6 +18,7 @@ import AutorizacionFactura from "../models/autorizacion_factura.model.js";
 import Venta from "../models/venta.model.js";
 import DetalleVenta from "../models/detalle_venta.model.js";
 import MovimientoInventario from "../models/movimiento_inventario.model.js";
+
 import { Op } from "sequelize";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -38,7 +39,116 @@ const Dashboard = componentLoader.add(
   path.resolve(__dirname, "components", "dashboard.jsx"),
 );
 
-// Grupos del menú
+// Zona horaria usada por el negocio
+const ZONA_HORARIA = "America/Tegucigalpa";
+const OFFSET_HONDURAS = "-06:00";
+
+const MS_POR_DIA = 24 * 60 * 60 * 1000;
+
+const rellenar = (valor) => String(valor).padStart(2, "0");
+
+// Obtiene la fecha actual según Honduras
+const obtenerFechaLocal = (fecha = new Date()) => {
+  const partes = new Intl.DateTimeFormat("en-CA", {
+    timeZone: ZONA_HORARIA,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(fecha);
+
+  const valores = {};
+
+  for (const parte of partes) {
+    if (parte.type !== "literal") {
+      valores[parte.type] = parte.value;
+    }
+  }
+
+  return {
+    anio: Number(valores.year),
+    mes: Number(valores.month),
+    dia: Number(valores.day),
+  };
+};
+
+// Crea una fecha usando horario de Honduras
+const crearFechaLocal = (anio, mes, dia) => {
+  return new Date(
+    `${anio}-${rellenar(mes)}-${rellenar(dia)}T00:00:00${OFFSET_HONDURAS}`,
+  );
+};
+
+// Suma días sin depender de la zona horaria del servidor
+const sumarDiasCalendario = ({ anio, mes, dia }, cantidad) => {
+  const fecha = new Date(Date.UTC(anio, mes - 1, dia + cantidad));
+
+  return {
+    anio: fecha.getUTCFullYear(),
+    mes: fecha.getUTCMonth() + 1,
+    dia: fecha.getUTCDate(),
+  };
+};
+
+// Genera los rangos necesarios para hoy y este mes
+const obtenerRangosTemporales = () => {
+  const hoy = obtenerFechaLocal();
+  const manana = sumarDiasCalendario(hoy, 1);
+
+  const siguienteMes = new Date(Date.UTC(hoy.anio, hoy.mes, 1));
+
+  return {
+    hoy,
+
+    inicioHoy: crearFechaLocal(hoy.anio, hoy.mes, hoy.dia),
+
+    inicioManana: crearFechaLocal(manana.anio, manana.mes, manana.dia),
+
+    inicioMes: crearFechaLocal(hoy.anio, hoy.mes, 1),
+
+    inicioMesSiguiente: crearFechaLocal(
+      siguienteMes.getUTCFullYear(),
+      siguienteMes.getUTCMonth() + 1,
+      1,
+    ),
+  };
+};
+
+// Normaliza una fecha al formato YYYY-MM-DD
+const normalizarFechaSoloDia = (valor) => {
+  if (!valor) return null;
+
+  if (valor instanceof Date) {
+    return `${valor.getUTCFullYear()}-${rellenar(
+      valor.getUTCMonth() + 1,
+    )}-${rellenar(valor.getUTCDate())}`;
+  }
+
+  const coincidencia = String(valor).match(/\d{4}-\d{2}-\d{2}/);
+
+  return coincidencia?.[0] ?? null;
+};
+
+// Calcula cuántos días faltan para una fecha
+const calcularDiasHasta = (fechaLimite, hoy) => {
+  const fechaTexto = normalizarFechaSoloDia(fechaLimite);
+
+  if (!fechaTexto) {
+    return null;
+  }
+
+  const [anio, mes, dia] = fechaTexto.split("-").map(Number);
+
+  const limiteUtc = Date.UTC(anio, mes - 1, dia);
+
+  const hoyUtc = Date.UTC(hoy.anio, hoy.mes - 1, hoy.dia);
+
+  return Math.round((limiteUtc - hoyUtc) / MS_POR_DIA);
+};
+
+// -----------------------------------------------------
+// NAVEGACIÓN
+// -----------------------------------------------------
+
 const navegacionInventario = {
   name: "Inventario",
   icon: "Package",
@@ -59,7 +169,11 @@ const navegacionSeguridad = {
   icon: "User",
 };
 
-// Bloquea modificaciones
+// -----------------------------------------------------
+// ACCIONES
+// -----------------------------------------------------
+
+// Bloquea cualquier modificación
 const accionesSoloLectura = {
   new: {
     isAccessible: false,
@@ -82,7 +196,8 @@ const accionesSoloLectura = {
   },
 };
 
-// Evita eliminación física
+// Permite crear y editar,
+// pero evita eliminación física
 const accionesSinEliminar = {
   delete: {
     isAccessible: false,
@@ -94,6 +209,10 @@ const accionesSinEliminar = {
     isVisible: false,
   },
 };
+
+// -----------------------------------------------------
+// USUARIOS
+// -----------------------------------------------------
 
 // Quita passwordHash de las respuestas
 const ocultarPassword = async (response) => {
@@ -157,24 +276,71 @@ const autenticarAdministrador = async ({ email, password }) => {
   }
 };
 
+// -----------------------------------------------------
+// DASHBOARD
+// -----------------------------------------------------
+
 const dashboardHandler = async () => {
+  const { hoy, inicioHoy, inicioManana, inicioMes, inicioMesSiguiente } =
+    obtenerRangosTemporales();
+
+  // Solo ventas que siguen vigentes
+  const filtroVentasVigentes = {
+    estado_factura: true,
+  };
+
+  // Ventas vigentes realizadas hoy
+  const filtroVentasHoy = {
+    estado_factura: true,
+
+    fecha_venta: {
+      [Op.gte]: inicioHoy,
+      [Op.lt]: inicioManana,
+    },
+  };
+
+  // Ventas vigentes del mes actual
+  const filtroVentasMes = {
+    estado_factura: true,
+
+    fecha_venta: {
+      [Op.gte]: inicioMes,
+      [Op.lt]: inicioMesSiguiente,
+    },
+  };
+
   const [
     totalProductos,
     totalClientes,
-    totalVentas,
+    ventasVigentes,
     stockBajo,
-    agotados,
-    ventasAnuladas,
+    productosAgotados,
+    facturasAnuladas,
     totalFacturado,
+    ventasHoy,
+    facturadoHoy,
+    ventasMes,
+    facturadoMes,
+    autorizacionActiva,
+    ultimasVentas,
+    productosStockCritico,
   ] = await Promise.all([
+    // Incluye productos activos e inactivos
     Producto.count(),
 
+    // Todos los clientes registrados
     Cliente.count(),
 
-    Venta.count(),
+    // Solo facturas vigentes
+    Venta.count({
+      where: filtroVentasVigentes,
+    }),
 
+    // Productos activos con stock entre 1 y 10
     Producto.count({
       where: {
+        estado: true,
+
         stock_actual: {
           [Op.gt]: 0,
           [Op.lte]: 10,
@@ -182,35 +348,180 @@ const dashboardHandler = async () => {
       },
     }),
 
+    // Productos activos sin existencias
     Producto.count({
       where: {
+        estado: true,
         stock_actual: 0,
       },
     }),
 
+    // Facturas anuladas
     Venta.count({
       where: {
         estado_factura: false,
       },
     }),
 
+    // Total histórico facturado,
+    // excluyendo facturas anuladas
     Venta.sum("total", {
+      where: filtroVentasVigentes,
+    }),
+
+    // Cantidad de ventas de hoy
+    Venta.count({
+      where: filtroVentasHoy,
+    }),
+
+    // Total facturado hoy
+    Venta.sum("total", {
+      where: filtroVentasHoy,
+    }),
+
+    // Cantidad de ventas del mes
+    Venta.count({
+      where: filtroVentasMes,
+    }),
+
+    // Total facturado este mes
+    Venta.sum("total", {
+      where: filtroVentasMes,
+    }),
+
+    // Autorización fiscal activa
+    AutorizacionFactura.findOne({
       where: {
-        estado_factura: true,
+        estado: true,
       },
+
+      order: [
+        ["fecha_autorizacion", "DESC"],
+        ["id_autorizacion", "DESC"],
+      ],
+
+      raw: true,
+    }),
+
+    // Últimas 7 ventas.
+    // Incluye anuladas para mostrar actividad real.
+    Venta.findAll({
+      attributes: [
+        "id_venta",
+        "numero_factura",
+        "cliente_nombre_factura",
+        "fecha_venta",
+        "total",
+        "estado_factura",
+      ],
+
+      order: [
+        ["fecha_venta", "DESC"],
+        ["id_venta", "DESC"],
+      ],
+
+      limit: 7,
+      raw: true,
+    }),
+
+    // 5 productos activos con menor stock
+    Producto.findAll({
+      where: {
+        estado: true,
+      },
+
+      attributes: [
+        "id_producto",
+        "codigo_producto",
+        "nombre_producto",
+        "stock_actual",
+      ],
+
+      order: [
+        ["stock_actual", "ASC"],
+        ["nombre_producto", "ASC"],
+      ],
+
+      limit: 5,
+      raw: true,
     }),
   ]);
+
+  // ---------------------------------------------------
+  // INFORMACIÓN FISCAL
+  // ---------------------------------------------------
+
+  let autorizacionFiscal = null;
+
+  if (autorizacionActiva) {
+    const siguienteCorrelativo = Number(
+      autorizacionActiva.siguiente_correlativo,
+    );
+
+    const rangoFinal = Number(autorizacionActiva.rango_final);
+
+    autorizacionFiscal = {
+      idAutorizacion: autorizacionActiva.id_autorizacion,
+
+      cai: autorizacionActiva.cai,
+
+      serie:
+        `${autorizacionActiva.establecimiento}-` +
+        `${autorizacionActiva.punto_emision}-` +
+        `${autorizacionActiva.tipo_documento}`,
+
+      fechaLimiteEmision: normalizarFechaSoloDia(
+        autorizacionActiva.fecha_limite_emision,
+      ),
+
+      diasParaVencer: calcularDiasHasta(
+        autorizacionActiva.fecha_limite_emision,
+        hoy,
+      ),
+
+      siguienteCorrelativo,
+
+      rangoFinal,
+
+      correlativosDisponibles: Math.max(
+        rangoFinal - siguienteCorrelativo + 1,
+        0,
+      ),
+    };
+  }
 
   return {
     totalProductos,
     totalClientes,
-    totalVentas,
+
+    ventasVigentes,
+
     stockBajo,
-    agotados,
-    ventasAnuladas,
-    totalFacturado: totalFacturado ?? 0,
+    productosAgotados,
+
+    facturasAnuladas,
+
+    totalFacturado: Number(totalFacturado ?? 0),
+
+    ventasHoy,
+
+    facturadoHoy: Number(facturadoHoy ?? 0),
+
+    ventasMes,
+
+    facturadoMes: Number(facturadoMes ?? 0),
+
+    autorizacionFiscal,
+
+    ultimasVentas,
+
+    productosStockCritico,
   };
 };
+
+// -----------------------------------------------------
+// ADMINJS
+// -----------------------------------------------------
 
 export async function crearAdminRouter() {
   const sessionSecret = process.env.ADMIN_SESSION_SECRET;
@@ -222,14 +533,23 @@ export async function crearAdminRouter() {
   const admin = new AdminJS({
     rootPath: "/admin",
 
+    // AdminJS en español
+    locale: {
+      language: "es",
+      availableLanguages: ["es"],
+    },
+
     componentLoader,
+
     dashboard: {
       component: Dashboard,
       handler: dashboardHandler,
     },
 
     resources: [
-      // Categorías
+      // -------------------------------------------------
+      // CATEGORÍAS
+      // -------------------------------------------------
       {
         resource: Categoria,
 
@@ -242,7 +562,9 @@ export async function crearAdminRouter() {
         },
       },
 
-      // Productos
+      // -------------------------------------------------
+      // PRODUCTOS
+      // -------------------------------------------------
       {
         resource: Producto,
 
@@ -254,7 +576,8 @@ export async function crearAdminRouter() {
           },
 
           properties: {
-            // El stock debe cambiar mediante movimientos
+            // El stock debe cambiar
+            // mediante movimientos.
             stock_actual: {
               isVisible: {
                 list: true,
@@ -267,7 +590,9 @@ export async function crearAdminRouter() {
         },
       },
 
-      // Movimientos de inventario
+      // -------------------------------------------------
+      // MOVIMIENTOS DE INVENTARIO
+      // -------------------------------------------------
       {
         resource: MovimientoInventario,
 
@@ -280,7 +605,9 @@ export async function crearAdminRouter() {
         },
       },
 
-      // Clientes
+      // -------------------------------------------------
+      // CLIENTES
+      // -------------------------------------------------
       {
         resource: Cliente,
 
@@ -293,7 +620,9 @@ export async function crearAdminRouter() {
         },
       },
 
-      // Ventas
+      // -------------------------------------------------
+      // VENTAS
+      // -------------------------------------------------
       {
         resource: Venta,
 
@@ -306,7 +635,9 @@ export async function crearAdminRouter() {
         },
       },
 
-      // Detalles de venta
+      // -------------------------------------------------
+      // DETALLES DE VENTA
+      // -------------------------------------------------
       {
         resource: DetalleVenta,
 
@@ -319,7 +650,9 @@ export async function crearAdminRouter() {
         },
       },
 
-      // Empresa
+      // -------------------------------------------------
+      // EMPRESA
+      // -------------------------------------------------
       {
         resource: Empresa,
 
@@ -345,7 +678,9 @@ export async function crearAdminRouter() {
         },
       },
 
-      // Autorizaciones fiscales
+      // -------------------------------------------------
+      // AUTORIZACIONES FISCALES
+      // -------------------------------------------------
       {
         resource: AutorizacionFactura,
 
@@ -358,7 +693,9 @@ export async function crearAdminRouter() {
         },
       },
 
-      // Usuarios
+      // -------------------------------------------------
+      // USUARIOS
+      // -------------------------------------------------
       {
         resource: User,
 
@@ -411,38 +748,57 @@ export async function crearAdminRouter() {
     branding: {
       companyName: "Inventario Fácil",
       withMadeWithLove: false,
+      // logo: "/app-icon.png",
+      favicon: "/app-icon.png",
     },
   });
-  // Recompila los componentes personalizados cuando cambian
+
+  // Recompila componentes personalizados
+  // cuando cambia el código en desarrollo.
   if (process.env.NODE_ENV === "development") {
     admin.watch();
   }
 
-  // Autenticación
+  // ---------------------------------------------------
+  // AUTENTICACIÓN
+  // ---------------------------------------------------
+
   const authProvider = new DefaultAuthProvider({
     componentLoader,
+
     authenticate: autenticarAdministrador,
   });
 
-  // Sesiones en MySQL
+  // ---------------------------------------------------
+  // SESIONES EN MYSQL
+  // ---------------------------------------------------
+
   const SequelizeStore = connectSessionSequelize(session.Store);
 
   const sessionStore = new SequelizeStore({
     db: sequelize,
+
     tableName: "admin_sessions",
+
     checkExpirationInterval: 15 * 60 * 1000,
+
     expiration: 24 * 60 * 60 * 1000,
   });
 
   await sessionStore.sync();
 
-  // Router protegido
+  // ---------------------------------------------------
+  // ROUTER PROTEGIDO
+  // ---------------------------------------------------
+
   const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
     admin,
 
     {
       provider: authProvider,
+
       cookieName: "inventario_facil_admin",
+
       cookiePassword: sessionSecret,
     },
 
@@ -450,16 +806,24 @@ export async function crearAdminRouter() {
 
     {
       store: sessionStore,
+
       secret: sessionSecret,
+
       resave: false,
+
       saveUninitialized: false,
+
       proxy: process.env.NODE_ENV === "production",
+
       name: "inventario_facil_admin",
 
       cookie: {
         httpOnly: true,
+
         secure: process.env.NODE_ENV === "production",
+
         sameSite: "lax",
+
         maxAge: 24 * 60 * 60 * 1000,
       },
     },

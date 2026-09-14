@@ -29,7 +29,7 @@ async function startServer() {
     // En producción se usan migraciones explícitas (sequelize-cli).
     // Lo veremos formalmente en la Semana 3.
     if (process.env.NODE_ENV === "development") {
-      await sequelize.sync({ alter: true });
+      await sequelize.sync();
       console.log("🔄 Modelos sincronizados con la base de datos.");
     }
 
