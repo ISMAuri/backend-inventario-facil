@@ -629,6 +629,17 @@ export async function crearAdminRouter() {
         options: {
           navigation: navegacionVentas,
 
+          properties: {
+            ruta_pdf_factura: {
+              isVisible: {
+                list: false,
+                filter: false,
+                show: false,
+                edit: false,
+              },
+            },
+          },
+
           actions: {
             ...accionesSoloLectura,
           },
