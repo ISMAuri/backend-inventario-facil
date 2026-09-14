@@ -1,6 +1,7 @@
 const sequelize = require("../config/database");
 const autorizacionRepository = require("../repositories/autorizacion_factura.repository");
 const empresaRepository = require("../repositories/empresa.repository");
+const ventaRepository = require("../repositories/venta.repository");
 
 class AutorizacionFacturaService {
   async listar({ estado, id_empresa } = {}) {
@@ -31,7 +32,39 @@ class AutorizacionFacturaService {
   async crear(datos) {
     await this._validarEmpresa(datos.id_empresa);
 
-    this._validarRangos(datos);
+    // Busca el último correlativo usado para esta misma serie.
+    const ultimaVenta = await ventaRepository.findUltimoCorrelativoPorSerie(
+      datos.establecimiento,
+      datos.punto_emision,
+      datos.tipo_documento,
+    );
+
+    if (ultimaVenta) {
+      const ultimoCorrelativo = Number(ultimaVenta.correlativo);
+      const siguienteEsperado = ultimoCorrelativo + 1;
+      const nuevoRangoInicial = Number(datos.rango_inicial);
+
+      if (nuevoRangoInicial !== siguienteEsperado) {
+        const error = new Error(
+          `El rango inicial debe comenzar en ${siguienteEsperado}, ` +
+            `ya que el último correlativo emitido fue ${ultimoCorrelativo}`,
+        );
+
+        error.statusCode = 409;
+        throw error;
+      }
+    }
+
+    // El backend controla el correlativo inicial.
+    const datosNuevaAutorizacion = {
+      ...datos,
+      rango_inicial: Number(datos.rango_inicial),
+      rango_final: Number(datos.rango_final),
+      siguiente_correlativo: Number(datos.rango_inicial),
+      estado: true,
+    };
+
+    this._validarRangos(datosNuevaAutorizacion);
 
     const transaction = await sequelize.transaction();
 
@@ -44,10 +77,7 @@ class AutorizacionFacturaService {
 
       // La nueva autorización siempre queda activa.
       const nuevaAutorizacion = await autorizacionRepository.create(
-        {
-          ...datos,
-          estado: true,
-        },
+        datosNuevaAutorizacion,
         transaction,
       );
 
