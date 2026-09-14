@@ -1,13 +1,6 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/database');
+const { DataTypes, Model } = require("sequelize");
+const sequelize = require("../config/database");
 
-// -----------------------------------------------------------------------
-// CONTEXTO PARA EL ESTUDIANTE:
-// Catálogo de categorías de servicios (plomería, electricidad, etc.).
-// Los servicios que publiquen los proveedores van a referenciar una
-// categoría por su id -- por eso "eliminar" nunca es un borrado físico,
-// solo se desactiva (ver categoria.repository.js).
-// -----------------------------------------------------------------------
 class Categoria extends Model {}
 
 Categoria.init(
@@ -17,22 +10,59 @@ Categoria.init(
       autoIncrement: true,
       primaryKey: true,
     },
+
     nombre: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true,
-      validate: { notEmpty: { msg: 'El nombre de la categoría es obligatorio' } },
+
+      set(valor) {
+        this.setDataValue(
+          "nombre",
+          valor == null ? valor : String(valor).trim(),
+        );
+      },
+
+      validate: {
+        notEmpty: {
+          msg: "El nombre de la categoría es obligatorio.",
+        },
+
+        len: {
+          args: [3, 100],
+          msg: "El nombre de la categoría debe tener al menos 3 caracteres.",
+        },
+      },
     },
+
     descripcion: {
       type: DataTypes.STRING(255),
-      allowNull: true,
+      allowNull: false,
+
+      set(valor) {
+        this.setDataValue(
+          "descripcion",
+          valor == null ? valor : String(valor).trim(),
+        );
+      },
+
+      validate: {
+        notEmpty: {
+          msg: "La descripción de la categoría es obligatoria.",
+        },
+
+        len: {
+          args: [5, 255],
+          msg: "La descripción debe tener al menos 5 caracteres.",
+        },
+      },
     },
-    // Nombre del ícono de Material Icons, para que la app Flutter lo
-    // renderice sin tener que mapear categoría -> ícono a mano.
+
     icono: {
       type: DataTypes.STRING(50),
       allowNull: true,
     },
+
     activo: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
@@ -41,10 +71,10 @@ Categoria.init(
   },
   {
     sequelize,
-    modelName: 'Categoria',
-    tableName: 'categorias',
+    modelName: "Categoria",
+    tableName: "categorias",
     timestamps: true,
-  }
+  },
 );
 
 module.exports = Categoria;
