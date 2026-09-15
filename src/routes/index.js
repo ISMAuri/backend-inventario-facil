@@ -10,6 +10,7 @@ const empresaRoutes = require('./empresa.routes');
 const movimientoInventarioRoutes = require('./movimiento_inventario.routes');
 
 
+
 const router = Router();
 
 // A medida que avancemos semanas, aquí se van sumando:

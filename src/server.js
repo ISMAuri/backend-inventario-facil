@@ -4,6 +4,7 @@ const sequelize = require("./config/database");
 
 // Importamos los modelos aquí para que Sequelize registre las
 // asociaciones (User.hasMany(RefreshToken), etc.) antes del sync/arranque.
+require("./models/password_reset_otp.model");
 require("./models/user.model");
 require("./models/refreshToken.model");
 require("./models/categoria.model");
@@ -14,6 +15,7 @@ require("./models/producto.model");
 require("./models/venta.model");
 require("./models/movimiento_inventario.model");
 require("./models/detalle_venta.model");
+require("./models/password_reset_otp.model");
 
 const PORT = process.env.PORT || 4000;
 

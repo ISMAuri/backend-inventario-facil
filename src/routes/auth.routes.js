@@ -3,6 +3,12 @@ const { body } = require("express-validator");
 
 const authController = require("../controllers/auth.controller");
 
+const passwordResetController = require("../controllers/password_reset.controller");
+
+const {
+  solicitarOtpLimiter,
+} = require("../middlewares/password_reset_rate_limit");
+
 const handleValidationErrors = require("../middlewares/validate");
 
 const { authenticate } = require("../middlewares/authenticate");
@@ -112,5 +118,57 @@ router.put(
 );
 
 router.get("/:id", authenticate, authController.obtenerUsuario);
+
+router.post(
+  "/password/otp",
+  solicitarOtpLimiter,
+  [
+    body("email")
+      .trim()
+      .isEmail()
+      .withMessage("Debe ser un correo válido")
+      .normalizeEmail(),
+  ],
+  handleValidationErrors,
+  passwordResetController.solicitarOtp,
+);
+
+router.post(
+  "/password/otp/verify",
+  [
+    body("recoveryId")
+      .isLength({ min: 64, max: 64 })
+      .withMessage("Identificador de recuperación inválido")
+      .isHexadecimal()
+      .withMessage("Identificador de recuperación inválido"),
+
+    body("otp")
+      .matches(/^\d{6}$/)
+      .withMessage("El código debe contener 6 dígitos"),
+  ],
+  handleValidationErrors,
+  passwordResetController.verificarOtp,
+);
+
+router.put(
+  "/password/reset",
+  [
+    body("recoveryId")
+      .isLength({ min: 64, max: 64 })
+      .withMessage("Identificador de recuperación inválido")
+      .isHexadecimal()
+      .withMessage("Identificador de recuperación inválido"),
+
+    body("passwordNueva")
+      .notEmpty()
+      .withMessage("La nueva contraseña es obligatoria")
+      .isLength({ min: 8 })
+      .withMessage("La contraseña debe tener al menos 8 caracteres")
+      .matches(/\d/)
+      .withMessage("La contraseña debe incluir al menos un número"),
+  ],
+  handleValidationErrors,
+  passwordResetController.restablecerPassword,
+);
 
 module.exports = router;
