@@ -42,7 +42,7 @@ router.post(
       .matches(/\d/)
       .withMessage("La contraseña debe incluir al menos un número"),
 
-    body("role").isIn(["client", "provider"]).withMessage("Rol inválido"),
+    body("role").isIn(["client", "provider", "user"]).withMessage("Rol inválido"),
   ],
 
   handleValidationErrors,
