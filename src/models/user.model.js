@@ -1,5 +1,5 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/database');
+const { DataTypes, Model } = require("sequelize");
+const sequelize = require("../config/database");
 
 class User extends Model {}
 
@@ -10,27 +10,33 @@ User.init(
       autoIncrement: true,
       primaryKey: true,
     },
+
     fullName: {
       type: DataTypes.STRING(150),
       allowNull: false,
     },
+
     email: {
       type: DataTypes.STRING(150),
       allowNull: false,
       unique: true,
-      validate: { isEmail: true },
+      validate: {
+        isEmail: true,
+      },
     },
-    // OJO: aquí NUNCA se guarda la contraseña en texto plano.
-    // Se guarda el hash generado con bcrypt (ver auth.service.js).
+
+    // Nunca se guarda la contraseña en texto plano.
     passwordHash: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+
     role: {
-      type: DataTypes.ENUM('client', 'provider', 'admin'),
+      type: DataTypes.ENUM("client", "user", "provider", "admin"),
       allowNull: false,
-      defaultValue: 'client',
+      defaultValue: "user",
     },
+
     isEmailVerified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
@@ -38,10 +44,10 @@ User.init(
   },
   {
     sequelize,
-    modelName: 'User',
-    tableName: 'users',
-    timestamps: true, // createdAt, updatedAt automáticos
-  }
+    modelName: "User",
+    tableName: "users",
+    timestamps: true,
+  },
 );
 
 module.exports = User;

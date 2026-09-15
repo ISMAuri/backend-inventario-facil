@@ -1,16 +1,12 @@
 const User = require("../models/user.model");
 
-// -----------------------------------------------------------------------
-// CONTEXTO PARA EL ESTUDIANTE:
-// El Repository es la ÚNICA capa que sabe que existe Sequelize.
-// El Service (lógica de negocio) no debería importar "User" directamente
-// desde Sequelize -- así, si en el futuro cambiamos el ORM, solo
-// reescribimos este archivo, y el resto del sistema ni se entera.
-// Esto es el patrón Repository + el principio de Inversión de Dependencias (SOLID).
-// -----------------------------------------------------------------------
 class UserRepository {
   async findByEmail(email) {
-    return User.findOne({ where: { email } });
+    return User.findOne({
+      where: {
+        email,
+      },
+    });
   }
 
   async findById(id) {
@@ -22,7 +18,43 @@ class UserRepository {
   }
 
   async create({ fullName, email, passwordHash, role }) {
-    return User.create({ fullName, email, passwordHash, role });
+    return User.create({
+      fullName,
+      email,
+      passwordHash,
+      role,
+    });
+  }
+
+  async updateProfile(id, { fullName, email }) {
+    await User.update(
+      {
+        fullName,
+        email,
+      },
+      {
+        where: {
+          id,
+        },
+      },
+    );
+
+    return this.findById(id);
+  }
+
+  async updatePassword(id, passwordHash) {
+    const [filasActualizadas] = await User.update(
+      {
+        passwordHash,
+      },
+      {
+        where: {
+          id,
+        },
+      },
+    );
+
+    return filasActualizadas > 0;
   }
 }
 

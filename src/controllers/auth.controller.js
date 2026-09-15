@@ -1,29 +1,18 @@
 const authService = require("../services/auth.service");
 
-// -----------------------------------------------------------------------
-// CONTEXTO PARA EL ESTUDIANTE:
-// El Controller es "delgado" a propósito (thin controller). Su único
-// trabajo es: leer el request, llamar al Service correcto, y decidir
-// el status code + forma de la respuesta. CERO lógica de negocio aquí.
-// Si ves un "if" que decide reglas de negocio dentro de un controller,
-// es una señal de alerta (code smell) -- esa lógica debería vivir en
-// el Service.
-// -----------------------------------------------------------------------
-
-// httpOnly + secure + sameSite: la defensa estándar contra robo de
-// cookies vía XSS y CSRF. El JS del navegador NO puede leer esta cookie.
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "strict",
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días, en ms
-  path: "/api/auth", // solo se envía en rutas de auth, no en toda la app
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  path: "/api/auth",
 };
 
 class AuthController {
   async register(req, res, next) {
     try {
       const { fullName, email, password, role } = req.body;
+
       const { accessToken, refreshToken, user } = await authService.register({
         fullName,
         email,
@@ -32,15 +21,20 @@ class AuthController {
       });
 
       res.cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
-      res.status(201).json({ accessToken, user });
+
+      res.status(201).json({
+        accessToken,
+        user,
+      });
     } catch (err) {
-      next(err); // delegamos al middleware centralizado de errores
+      next(err);
     }
   }
 
   async login(req, res, next) {
     try {
       const { email, password } = req.body;
+
       const { accessToken, refreshToken, user } = await authService.login({
         email,
         password,
@@ -48,7 +42,11 @@ class AuthController {
       });
 
       res.cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
-      res.status(200).json({ accessToken, user });
+
+      res.status(200).json({
+        accessToken,
+        user,
+      });
     } catch (err) {
       next(err);
     }
@@ -57,15 +55,22 @@ class AuthController {
   async refresh(req, res, next) {
     try {
       const oldRefreshToken = req.cookies?.refreshToken;
+
       if (!oldRefreshToken) {
-        return res.status(401).json({ message: "No hay sesión activa" });
+        return res.status(401).json({
+          message: "No hay sesión activa",
+        });
       }
 
       const { accessToken, refreshToken, user } =
         await authService.refresh(oldRefreshToken);
 
       res.cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
-      res.status(200).json({ accessToken, user });
+
+      res.status(200).json({
+        accessToken,
+        user,
+      });
     } catch (err) {
       next(err);
     }
@@ -74,15 +79,61 @@ class AuthController {
   async logout(req, res, next) {
     try {
       const refreshToken = req.cookies?.refreshToken;
+
       if (refreshToken) {
         await authService.logout(refreshToken);
       }
+
       res.clearCookie("refreshToken", REFRESH_COOKIE_OPTIONS);
+
       res.status(204).send();
     } catch (err) {
       next(err);
     }
   }
+
+  async obtenerPerfil(req, res, next) {
+    try {
+      const usuario = await authService.obtenerPerfil(req.user.id);
+
+      res.status(200).json(usuario);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async actualizarPerfil(req, res, next) {
+    try {
+      const { fullName, email } = req.body;
+
+      const usuario = await authService.actualizarPerfil(req.user.id, {
+        fullName,
+        email,
+      });
+
+      res.status(200).json({
+        message: "Perfil actualizado correctamente",
+        user: usuario,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async cambiarPassword(req, res, next) {
+    try {
+      const { passwordNueva } = req.body;
+
+      await authService.cambiarPassword(req.user.id, passwordNueva);
+
+      res.status(200).json({
+        message: "Contraseña actualizada correctamente",
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async obtenerUsuario(req, res, next) {
     try {
       const usuario = await authService.obtenerPorId(req.params.id);
