@@ -95,7 +95,10 @@ router.put(
       .trim()
       .isLength({ max: 50 }),
 
-    body("precio_compra").optional().isFloat({ min: 0 }),
+    body("precio_compra")
+      .optional({ checkFalsy: true })
+      .isFloat({ min: 0 })
+      .withMessage("El precio de compra no puede ser negativo"),
 
     body("precio_venta").optional().isFloat({ min: 0 }),
 
