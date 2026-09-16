@@ -436,8 +436,8 @@ function dibujarCliente(doc, venta) {
   if (venta.cliente_telefono_factura) {
     etiquetaValor(
       doc,
-      "Teléfono: +504 ",
-      textoSeguro(venta.cliente_telefono_factura),
+      "Teléfono: ",
+      textoSeguro(`+504 ${venta.cliente_telefono_factura}`),
       {
         anchoEtiqueta: 60,
       },
