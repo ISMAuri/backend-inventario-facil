@@ -787,6 +787,8 @@ La documentación completa del proyecto se mantiene de forma centralizada:
 ├── docs/
 │   ├── manual_usuario.pdf
 │   ├── diagrama_er.pdf
+│   ├── diagrama_er.png
+│   ├── diagrama_er.mwb
 │   └── Inventario_Facil.postman_collection.json
 └── ...
 ```
@@ -1351,13 +1353,12 @@ Validaciones y mejoras
 **Asignatura:** Programación Móvil  
 **Grupo:** Grupo 1  
 **Docente:** Ing. Reynaldo Cruz  
-**Año:** 2026
+**Año:** 2026 Q3
 
 ### Integrantes
 
 - Ismael Mauricio Castillo Castro
 - Nidia Samantha Enamorado Taylor
-- Nombre del integrante 3
 
 ---
 

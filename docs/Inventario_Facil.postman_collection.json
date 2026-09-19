@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "8c171d41-f69e-43f2-bce2-87d9165bf005",
     "name": "Inventario Fácil API",
-    "description": "Colección completa de la API REST de Inventario Fácil.\n\nURL de producción: https://api.ismaelcastillo.me/api\nURL local: http://localhost:4000/api\n\nPor defecto {{base_url}} apunta a producción. Para trabajar localmente cambie la variable base_url.\n\nAutenticación:\n- La colección usa Bearer {{access_token}} en las rutas protegidas.\n- Login, register y refresh actualizan access_token automáticamente.\n- El refresh token es una cookie HttpOnly; Postman la gestiona mediante su Cookie Jar.\n- Las peticiones públicas se encuentran configuradas con No Auth.\n\nPrecaución: POST, PUT, PATCH y DELETE pueden modificar datos reales si base_url apunta a producción. Revise IDs y cuerpos antes de enviarlos.",
+    "description": "Colección completa de la API REST de Inventario Fácil.\n\nURL de producción: https://api2.ismaelcastillo.me/api\nURL local: http://localhost:4000/api\n\nPor defecto {{base_url}} apunta a producción. Para trabajar localmente cambie la variable base_url.\n\nAutenticación:\n- La colección usa Bearer {{access_token}} en las rutas protegidas.\n- Login, register y refresh actualizan access_token automáticamente.\n- El refresh token es una cookie HttpOnly; Postman la gestiona mediante su Cookie Jar.\n- Las peticiones públicas se encuentran configuradas con No Auth.\n\nPrecaución: POST, PUT, PATCH y DELETE pueden modificar datos reales si base_url apunta a producción. Revise IDs y cuerpos antes de enviarlos.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -859,7 +859,7 @@
             "description": "Crea una empresa. Requiere administrador.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre_empresa\": \"Inventario Fácil\",\n  \"razon_social\": \"Inventario Fácil\",\n  \"rtn\": \"08011999123456\",\n  \"direccion\": \"Tegucigalpa, Honduras\",\n  \"telefono\": \"9999-9999\",\n  \"correo\": \"empresa@ejemplo.com\",\n  \"logo\": \"https://api.ismaelcastillo.me/app-icon.png\"\n}",
+              "raw": "{\n  \"nombre_empresa\": \"Inventario Fácil\",\n  \"razon_social\": \"Inventario Fácil\",\n  \"rtn\": \"08011999123456\",\n  \"direccion\": \"Tegucigalpa, Honduras\",\n  \"telefono\": \"9999-9999\",\n  \"correo\": \"empresa@ejemplo.com\",\n  \"logo\": \"https://api2.ismaelcastillo.me/app-icon.png\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -902,7 +902,7 @@
             "description": "Actualiza los datos de una empresa. Requiere administrador.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre_empresa\": \"Inventario Fácil\",\n  \"razon_social\": \"Inventario Fácil\",\n  \"rtn\": \"08011999123456\",\n  \"direccion\": \"Tegucigalpa, Honduras\",\n  \"telefono\": \"9999-9999\",\n  \"correo\": \"empresa@ejemplo.com\",\n  \"logo\": \"https://api.ismaelcastillo.me/app-icon.png\"\n}",
+              "raw": "{\n  \"nombre_empresa\": \"Inventario Fácil\",\n  \"razon_social\": \"Inventario Fácil\",\n  \"rtn\": \"08011999123456\",\n  \"direccion\": \"Tegucigalpa, Honduras\",\n  \"telefono\": \"9999-9999\",\n  \"correo\": \"empresa@ejemplo.com\",\n  \"logo\": \"https://api2.ismaelcastillo.me/app-icon.png\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
