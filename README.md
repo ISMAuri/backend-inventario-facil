@@ -860,7 +860,7 @@ npm install
 
 ### 3. Configurar las variables de entorno
 
-Crear un archivo `.env` en la raíz del proyecto tomando como referencia el archivo `.env.example`.
+Crear un archivo `.env` en la raíz del proyecto tomando como referencia lo siguiente(no compartir el `.env` personal con nadie):
 
 Ejemplo:
 
@@ -912,7 +912,7 @@ Pueden generarse, por ejemplo, con:
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
 
-> **Importante:** el archivo `.env` contiene información sensible y nunca debe subirse al repositorio. El archivo `.env.example` sí puede mantenerse versionado, siempre que no contenga credenciales reales.
+> **Importante:** el archivo `.env` contiene información sensible y nunca debe subirse al repositorio.
 
 ### 4. Configurar MySQL
 
